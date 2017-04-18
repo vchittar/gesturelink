@@ -51,7 +51,7 @@ body {
     margin-right: -4px;
   }
  
-  /* Options 2 - Float
+   Options 2 - Float
   .nav li {
     float: left;
   }
@@ -63,5 +63,5 @@ body {
   .nav {
     background-color: #444;
   }
-  */
+  
 }
