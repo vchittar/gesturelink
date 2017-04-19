@@ -1,6 +1,9 @@
 from flask import Flask
 from flask import render_template
+from flask import request
+#app = Flask(static_folder = '/Users/vishnuchittari/gesturelink')
 app = Flask(__name__)
+
 
 @app.route("/")
 def hello():
@@ -17,6 +20,10 @@ def proposal():
 @app.route('/demo')
 def demo():
     return render_template("demo.html")
+
+@app.route('/survey')
+def survey():
+	return render_template("survey.html")
 
 
 if __name__ == "__main__":
