@@ -25,6 +25,11 @@ def demo():
 def survey():
 	return render_template("survey.html")
 
+@app.route('/trydemo', methods=["GET"])
+def trydemo():
+    type = request.args.get('type')
+    return render_template("trydemo.html")
+
 
 if __name__ == "__main__":
     app.run()
