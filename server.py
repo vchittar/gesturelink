@@ -65,26 +65,17 @@ def send_js(path):
 # Route that will process the file upload
 @app.route('/upload', methods=['POST'])
 def upload():
-    # Get the name of the uploaded file
-    print(request)
-    print(request.files)
     file = request.files['file']
-    # Check if the file is one of the allowed types/extensions
     if file:
         print(file)
-        # Make the filename safe, remove unsupported chars
         filename = secure_filename(file.name)
-        # Move the file form the temporal folder to
-        # the upload folder we setup
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'],  time.strftime("%I%M%S") + ".wav"))
-        # Redirect the user to the uploaded_file route, which
-        # will basicaly show on the browser the uploaded file
+        path = os.path.join(app.config['UPLOAD_FOLDER'], request.form.get('path'))
+        path = os.path.abspath(path)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        file.save(os.path.join(path,  time.strftime("%I%M%S") + ".wav"))
         return redirect(url_for('lightsDemo'))
 
-# This route is expecting a parameter containing the name
-# of a file. Then it will locate that file on the upload
-# directory and show it on the browser, so if the user uploads
-# an image, that image is going to be show after the upload
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],

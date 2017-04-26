@@ -65,11 +65,12 @@ function classify() {
 
   var folderTypeForm = document.getElementById("folderType");
   var path = folderTypeForm.value;
+  console.log(path);
 
   var formData = new FormData();
   formData.append("name", "filename.wav");
   formData.append("file", gBlob);
-  formData.append("path", path)
+  formData.append("path", path);
   xhr.open("POST", "upload", true);
   console.log(formData);
   xhr.send(formData);
