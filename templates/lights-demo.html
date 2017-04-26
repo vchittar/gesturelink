@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html>
+<title>Gesture Link</title>
+<body>
+
+
+       <nav class="navbar navbar-default" role="navigation">
+    	  <div class="container">
+		    <!-- Brand and toggle get grouped for better mobile display -->
+		    <div class="navbar-header">
+		      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-brand-centered">
+		        <span class="sr-only">Toggle navigation</span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		      </button>
+		      <a href="">
+		      <div class="navbar-brand" style=" font-style: bold; font-size: 20px;">Gesture Link</div> </a>
+		    </div>
+
+		    <!-- Collect the nav links, forms, and other content for toggling -->
+		    <div class="collapse navbar-collapse" id="navbar-brand-centered">
+		      <ul class="nav navbar-nav">
+		        <li><a href="proposal">Proposal</a></li>
+		        <li><a href="slides">Slides</a></li>
+		      </ul>
+		      <ul class="nav navbar-nav navbar-right">
+		        <li class="active"><a href="demo">Demo</a></li>
+            <li><a href="survey">Survey</a></li>
+		      </ul>
+		    </div><!-- /.navbar-collapse -->
+		  </div><!-- /.container-fluid -->
+		</nav>
+
+<style type="text/css">
+h1{
+	text-align: center;
+}
+
+canvas {
+  display: inline-block;
+  background: #202020;
+  width: 95%;
+  height: 45%;
+  box-shadow: 0px 0px 10px blue;
+}
+#controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  height: 20%;
+  width: 100%;
+}
+#record { height: 15vh; }
+#record.recording {
+  background: red;
+  background: -webkit-radial-gradient(center, ellipse cover, #ff0000 0%,lightgrey 75%,lightgrey 100%,#7db9e8 100%);
+  background: -moz-radial-gradient(center, ellipse cover, #ff0000 0%,lightgrey 75%,lightgrey 100%,#7db9e8 100%);
+  background: radial-gradient(center, ellipse cover, #ff0000 0%,lightgrey 75%,lightgrey 100%,#7db9e8 100%);
+}
+#save, #save img { height: 10vh; }
+#save[download] { opacity: 1;}
+#viz {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 20px;
+}
+@media (orientation: landscape) {
+  body { flex-direction: row;}
+  #controls { flex-direction: column; height: 100%; width: 10%;}
+  #viz { height: 100%; width: 90%;}
+}
+
+@media screen and (min-width:768px){
+    .navbar-brand-centered {
+
+        position: absolute;
+        left: 45%;
+        display: block;
+        width: 160px;
+        text-align: center;
+        background-color: #eee;
+    }
+    .navbar>.container .navbar-brand-centered,
+    .navbar>.container-fluid .navbar-brand-centered {
+        margin-left: -80px;
+    }
+}
+
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+<div class="container">
+<div class="row">
+  <div class="col-md-8">
+    <h2>Directions</h2>
+    <p class="lead">Make sure you have a micrphone connected to your computer. Accept the permissions. When you are ready, press the record button to record a gesture. Press stop when your gesture is complete. It will process the audio and perform an action with an image on the right. It will also print an output below in the output section. If you find that the microphone gesture recognition is not working, you can control the state using the "Q" key to toggle between possble states.</p>
+    <div id="viz">
+  		<canvas style="height:100px;" id="analyser"></canvas>
+  		<canvas style="height:100px; margin-top:20px;" id="wavedisplay"></canvas>
+  	</div>
+    <button id="recordButton" href="#" onclick="toggleRecording(this); recordButtonPressed();" class="btn btn-danger btn-lg btn-block"><span class="glyphicon glyphicon-record"></span> Record a Gesture</button>
+    <a class="btn btn-primary btn-lg btn-block" style="height:45px;" id="save" href="#"><span class="glyphicon glyphicon-circle-arrow-down"></span> Download</a>
+    <div style="margin-top:10px;" class="progress">
+    </div>
+    <h4 style="margin-top:12px;">Output</h4>
+    <div id="waveformOutput"></div>
+    <ol>
+      <li>Page loaded</li>
+    </ol>
+  </div>
+  <div class="col-md-4">
+    <img id="demoimage" style="max-width:400px;" src="http://deskofkyle.com/hci-project/off.png"></img>
+  </div>
+</div>
+<div style="margin-top: 100px; margin-top: 100px; max-width: 700px;" class="container">
+  <h1>How This Works <small>Some detail on audio classification techniques</small></h1>
+  <p>For this project, we are using pyAudioAnalysis which is a Python library. It has easy-to-call wrappers which can execute audio analysis tasks. The example below trains an audio segment classifier, given a set of WAV files stored in folders (each folder representing a different class) and then the trained classifier is used to classify an unknown audio WAV file. In this case, the recorded audio is processed against a set of ~10 pre-recorded gesture sounds. If it matches the class, then it performs the action.</p>
+  <pre><p>from pyAudioAnalysis import audioTrainTest as aT
+  aT.featureAndTrain(["classifierData/single-tap","classifierData/double-tap"], 1.0, 1.0, aT.shortTermWindow, aT.shortTermStep, "svm", "svmSMtemp", False)
+  aT.fileClassification("data/recording.wav", "svmSMtemp","svm")
+  Result:
+  (0.0, array([ 0.09843239,  0.90156761]), ['single-tap', 'double-tap'])</p></pre>
+  We are also using Flask to integrate the Python program with the HTML page which provides the recording. Flask is a web framework written in Python that provides basic server functionality.
+</div>
+</div>
+
+<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src='http://masonry.desandro.com/masonry.pkgd.js'></script>
+<script>
+var isRecording = false;
+var gestureStateActive = false;
+var demoImage = document.getElementById("demoimage");
+
+$(document).keydown(function(evt) {
+  if (isRecording == false) {
+    if (evt.keyCode == 81) {
+      space = true;
+
+      if (gestureStateActive == false) {
+        gestureStateActive = true;
+        demoImage.src = "http://deskofkyle.com/hci-project/on.png";
+        $("ol").append("<li>Gesture detected... Active state</li>");
+      } else {
+        gestureStateActive = false;
+        demoImage.src = "http://deskofkyle.com/hci-project/off.png";
+        $("ol").append("<li>Gesture detected... Deactive state</li>");
+      }
+    }
+  }
+});
+
+function recordButtonPressed() {
+  var recordButton = document.getElementById("recordButton");
+
+  if (isRecording == false) {
+    isRecording = true;
+    recordButton.classList.add('active');
+    recordButton.innerHTML = "Stop Listening";
+    $("ol").append("<li>Listening for a gesture...</li>");
+  } else {
+    isRecording = false;
+    recordButton.classList.remove('active');
+    recordButton.innerHTML = "Record a Gesture";
+    $("ol").append("<li>Stopped looking for a gesture...</li>");
+    $("ol").append("<li>Processing...</li>");
+    arbitraryLoadingBar(0);
+  }
+}
+
+function resetLoadingBar() {
+  setTimeout(function() { switchStates(); }, 1000);
+
+}
+
+function switchStates() {
+  if (isRecording == false) {
+    if (gestureStateActive == false) {
+      gestureStateActive = true;
+      demoImage.src = "http://deskofkyle.com/hci-project/on.png";
+      $("ol").append("<li>Gesture detected... Active state</li>");
+    } else {
+      gestureStateActive = false;
+      demoImage.src = "http://deskofkyle.com/hci-project/off.png";
+      $("ol").append("<li>Gesture detected... Deactive state</li>");
+    }
+  }
+}
+</script>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+<script src="js/audiodisplay.js"></script>
+<script src="js/recorder.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

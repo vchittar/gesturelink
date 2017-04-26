@@ -1,0 +1,221 @@
+
+<!DOCTYPE html>
+<html>
+<title>Gesture Link</title>
+<body>
+       <nav class="navbar navbar-default" role="navigation">
+    	  <div class="container">
+		    <!-- Brand and toggle get grouped for better mobile display -->
+		    <div class="navbar-header">
+		      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-brand-centered">
+		        <span class="sr-only">Toggle navigation</span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		      </button>
+		      <a href="">
+		      <div class="navbar-brand" style=" font-style: bold; font-size: 20px;">Gesture Link</div> </a>
+		    </div>
+
+		    <!-- Collect the nav links, forms, and other content for toggling -->
+		    <div class="collapse navbar-collapse" id="navbar-brand-centered">
+		      <ul class="nav navbar-nav">
+		        <li><a href="proposal">Proposal</a></li>
+		        <li><a href="slides">Slides</a></li>
+		      </ul>
+		      <ul class="nav navbar-nav navbar-right">
+		        <li class="active"><a href="demo">Demo</a></li>
+            <li><a href="survey">Survey</a></li>
+		      </ul>
+		    </div><!-- /.navbar-collapse -->
+		  </div><!-- /.container-fluid -->
+		</nav>
+
+<style type="text/css">
+h1{
+	text-align: center;
+}
+
+@media screen and (min-width:768px){
+    .navbar-brand-centered {
+
+        position: absolute;
+        left: 45%;
+        display: block;
+        width: 160px;
+        text-align: center;
+        background-color: #eee;
+    }
+    .navbar>.container .navbar-brand-centered,
+    .navbar>.container-fluid .navbar-brand-centered {
+        margin-left: -80px;
+    }
+}
+</style>
+
+<div class="container">
+<p style="display:inline-block;margin-right:10px;"><b>Wizard of Oz:</b></p>
+<input style="display:inline-block;" type="checkbox" checked data-toggle="toggle" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger">
+<div class="row">
+  <div class="col-md-8">
+    <h2>Directions</h2>
+    <p class="lead">Make sure you have a micrphone connected to your computer. Accept the permissions. When you are ready, press the record button to record a gesture. Press stop when your gesture is complete. It will process the audio and perform an action with an image on the right. It will also print an output below in the output section. If you find that the microphone gesture recognition is not working, switch "on" the Wizard of Oz. You can use press the "Q" key to toggle between possble states.</p>
+    <div id="waveform"></div>
+    <button id="recordButton" href="#" onclick="recordButtonPressed()" class="btn btn-danger btn-lg btn-block"><span class="glyphicon glyphicon-record"></span> Record a Gesture</button>
+    <div style="margin-top:20px;" class="progress">
+      <div id="progressBar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+    </div>
+    <h4 style="margin-top:12px;">Console Output</h4>
+    <ol>
+      <li>Page loaded</li>
+    </ol>
+  </div>
+  <div class="col-md-4">
+    <img id="demoimage" style="max-width:400px;" src="http://deskofkyle.com/hci-project/play.jpg"></img>
+    <audio id="audioPlayer" controls>
+      <source src="http://deskofkyle.com/hci-project/theheart.m4a" type="audio/mp4">
+    </audio>
+  </div>
+</div>
+<div style="margin-top: 100px; margin-bottom: 100px; max-width: 700px;" class="container">
+  <h1>How This Works <small>Some detail on audio classification techniques</small></h1>
+  <p>For this project, we are using pyAudioAnalysis which is a Python library. It has easy-to-call wrappers which can execute audio analysis tasks. The example below trains an audio segment classifier, given a set of WAV files stored in folders (each folder representing a different class) and then the trained classifier is used to classify an unknown audio WAV file. In this case, the recorded audio is processed against a set of ~10 pre-recorded gesture sounds. If it matches the class, then it performs the action.</p>
+  <pre><p>from pyAudioAnalysis import audioTrainTest as aT
+  aT.featureAndTrain(["classifierData/single-tap","classifierData/double-tap"], 1.0, 1.0, aT.shortTermWindow, aT.shortTermStep, "svm", "svmSMtemp", False)
+  aT.fileClassification("data/recording.wav", "svmSMtemp","svm")
+  Result:
+  (0.0, array([ 0.09843239,  0.90156761]), ['single-tap', 'double-tap'])</p></pre>
+  We are also using Flask to integrate the Python program with the HTML page which provides the recording. Flask is a web framework written in Python that provides basic server functionality.
+</div>
+</div>
+
+<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src='http://masonry.desandro.com/masonry.pkgd.js'></script>
+
+<!-- main wavesurfer.js lib -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/1.2.3/wavesurfer.min.js"></script>
+<!-- wavesurfer.js microphone -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/1.2.3/plugin/wavesurfer.microphone.min.js"></script>
+
+<script>
+var isRecording = false;
+var gestureStateActive = false;
+var demoImage = document.getElementById("demoimage");
+
+$(document).keydown(function(evt) {
+  if (isRecording == false) {
+    if (evt.keyCode == 81) {
+      space = true;
+
+      if (gestureStateActive == false) {
+        gestureStateActive = true;
+        demoImage.src = "http://deskofkyle.com/hci-project/pause.jpg";
+        $("ol").append("<li>Gesture detected... Active state</li>");
+      } else {
+        gestureStateActive = false;
+        demoImage.src = "http://deskofkyle.com/hci-project/play.jpg";
+        $("ol").append("<li>Gesture detected... Deactive state</li>");
+      }
+    }
+  }
+});
+
+function recordButtonPressed() {
+  var recordButton = document.getElementById("recordButton");
+
+  if (isRecording == false) {
+    isRecording = true;
+    microphone.start();
+    recordButton.classList.add('active');
+    recordButton.innerHTML = "Stop Listening";
+    $("ol").append("<li>Listening for a gesture...</li>");
+    progressBar.style.width = 0 + "%";
+  } else {
+    isRecording = false;
+    microphone.stop();
+    recordButton.classList.remove('active');
+    recordButton.innerHTML = "Record a Gesture";
+    $("ol").append("<li>Stopped looking for a gesture...</li>");
+    $("ol").append("<li>Processing...</li>");
+    progressBar.style.width = 0 + "%";
+    arbitraryLoadingBar(0);
+  }
+}
+
+var progressBar = document.getElementById("progressBar");
+
+function arbitraryLoadingBar(loadingBarProgress) {
+  progressBar.style.width = 100 + "%";
+  setTimeout(function() { resetLoadingBar(); }, 3000);
+}
+
+function resetLoadingBar() {
+  setTimeout(function() { switchStates(); }, 1000);
+  $('.progress-bar').attr('style', "width: 0%");
+}
+
+function switchStates() {
+  var audioPlayer = document.getElementById("audioPlayer");
+
+  if (isRecording == false) {
+    if (gestureStateActive == false) {
+      gestureStateActive = true;
+      demoImage.src = "http://deskofkyle.com/hci-project/pause.jpg";
+      $("ol").append("<li>Gesture detected... Active state</li>");
+      audioPlayer.play();
+    } else {
+      gestureStateActive = false;
+      demoImage.src = "http://deskofkyle.com/hci-project/play.jpg";
+      $("ol").append("<li>Gesture detected... Deactive state</li>");
+      audioPlayer.pause();
+    }
+  }
+}
+</script>
+
+<script>
+var wavesurfer = WaveSurfer.create({ container: '#waveform', waveColor: 'red' });
+wavesurfer.barHeight = 10;
+wavesurfer.barWidth = 100;
+
+var microphone = Object.create(WaveSurfer.Microphone);
+
+microphone.init({
+    wavesurfer: wavesurfer
+});
+
+microphone.on('deviceReady', function(stream) {
+    console.log('Device ready!', stream);
+});
+microphone.on('deviceError', function(code) {
+    console.warn('Device error: ' + code);
+});
+
+// pause rendering
+//microphone.pause();
+
+// resume rendering
+//microphone.play();
+
+// stop visualization and disconnect microphone
+//microphone.stopDevice();
+
+// same as stopDevice() but also clears the wavesurfer canvas
+//microphone.stop();
+
+// destroy the plugin
+//microphone.destroy();
+</script>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+</body>
+</html>

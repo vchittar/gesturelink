@@ -64,6 +64,9 @@ h1{
     <p class="lead">Make sure you have a micrphone connected to your computer. Accept the permissions. When you are ready, press the record button to record a gesture. Press stop when your gesture is complete. It will process the audio and perform an action with an image on the right. It will also print an output below in the output section. If you find that the microphone gesture recognition is not working, switch "on" the Wizard of Oz. You can use press the "Q" key to toggle between possble states.</p>
     <div id="waveform"></div>
     <button id="recordButton" href="#" onclick="recordButtonPressed()" class="btn btn-danger btn-lg btn-block"><span class="glyphicon glyphicon-record"></span> Record a Gesture</button>
+    <div style="margin-top:20px;" class="progress">
+      <div id="progressBar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+    </div>
     <h4 style="margin-top:12px;">Console Output</h4>
     <ol>
       <li>Page loaded</li>
@@ -72,6 +75,16 @@ h1{
   <div class="col-md-4">
     <img id="demoimage" style="max-width:400px;" src="http://deskofkyle.com/hci-project/off.png"></img>
   </div>
+</div>
+<div style="margin-top: 100px; margin-top: 100px; max-width: 700px;" class="container">
+  <h1>How This Works <small>Some detail on audio classification techniques</small></h1>
+  <p>For this project, we are using pyAudioAnalysis which is a Python library. It has easy-to-call wrappers which can execute audio analysis tasks. The example below trains an audio segment classifier, given a set of WAV files stored in folders (each folder representing a different class) and then the trained classifier is used to classify an unknown audio WAV file. In this case, the recorded audio is processed against a set of ~10 pre-recorded gesture sounds. If it matches the class, then it performs the action.</p>
+  <pre><p>from pyAudioAnalysis import audioTrainTest as aT
+  aT.featureAndTrain(["classifierData/single-tap","classifierData/double-tap"], 1.0, 1.0, aT.shortTermWindow, aT.shortTermStep, "svm", "svmSMtemp", False)
+  aT.fileClassification("data/recording.wav", "svmSMtemp","svm")
+  Result:
+  (0.0, array([ 0.09843239,  0.90156761]), ['single-tap', 'double-tap'])</p></pre>
+  We are also using Flask to integrate the Python program with the HTML page which provides the recording. Flask is a web framework written in Python that provides basic server functionality.
 </div>
 </div>
 
@@ -115,6 +128,7 @@ function recordButtonPressed() {
     recordButton.classList.add('active');
     recordButton.innerHTML = "Stop Listening";
     $("ol").append("<li>Listening for a gesture...</li>");
+    progressBar.style.width = 0 + "%";
   } else {
     isRecording = false;
     microphone.stop();
@@ -122,6 +136,34 @@ function recordButtonPressed() {
     recordButton.innerHTML = "Record a Gesture";
     $("ol").append("<li>Stopped looking for a gesture...</li>");
     $("ol").append("<li>Processing...</li>");
+    progressBar.style.width = 0 + "%";
+    arbitraryLoadingBar(0);
+  }
+}
+
+var progressBar = document.getElementById("progressBar");
+
+function arbitraryLoadingBar(loadingBarProgress) {
+  progressBar.style.width = 100 + "%";
+  setTimeout(function() { resetLoadingBar(); }, 3000);
+}
+
+function resetLoadingBar() {
+  setTimeout(function() { switchStates(); }, 1000);
+  $('.progress-bar').attr('style', "width: 0%");
+}
+
+function switchStates() {
+  if (isRecording == false) {
+    if (gestureStateActive == false) {
+      gestureStateActive = true;
+      demoImage.src = "http://deskofkyle.com/hci-project/on.png";
+      $("ol").append("<li>Gesture detected... Active state</li>");
+    } else {
+      gestureStateActive = false;
+      demoImage.src = "http://deskofkyle.com/hci-project/off.png";
+      $("ol").append("<li>Gesture detected... Deactive state</li>");
+    }
   }
 }
 </script>
