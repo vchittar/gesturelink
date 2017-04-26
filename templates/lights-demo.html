@@ -38,6 +38,10 @@ h1{
 	text-align: center;
 }
 
+.input-group {
+  margin-top: 10px;
+}
+
 canvas {
   display: inline-block;
   background: #202020;
@@ -117,13 +121,16 @@ canvas {
   	</div>
     <button id="recordButton" href="#" onclick="toggleRecording(this); recordButtonPressed();" class="btn btn-danger btn-lg btn-block"><span class="glyphicon glyphicon-record"></span> Record a Gesture</button>
     <a class="btn btn-primary btn-lg btn-block" style="height:45px;" id="save" href="#"><span class="glyphicon glyphicon-circle-arrow-down"></span> Download</a>
-    <div style="margin-top:10px;" class="progress">
-    </div>
-    <h4 style="margin-top:12px;">Output</h4>
-    <div id="waveformOutput"></div>
-    <ol>
-      <li>Page loaded</li>
-    </ol>
+    <div class="row">
+    <div class="col-lg-6">
+      <div class="input-group">
+        <input id="folderType" type="text" class="form-control" placeholder="double-tap, single-tap, knock">
+        <span class="input-group-btn">
+          <button class="btn btn-default" onclick="classify()" type="button">Train!</button>
+        </span>
+      </div><!-- /input-group -->
+    </div><!-- /.col-lg-6 -->
+  </div><!-- /.row -->
   </div>
   <div class="col-md-4">
     <img id="demoimage" style="max-width:400px;" src="http://deskofkyle.com/hci-project/off.png"></img>

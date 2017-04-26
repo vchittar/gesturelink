@@ -24,6 +24,7 @@ var rafID = null;
 var analyserContext = null;
 var canvasWidth, canvasHeight;
 var recIndex = 0;
+var gBlob = null;
 
 /* TODO:
 
@@ -49,8 +50,29 @@ function gotBuffers( buffers ) {
 }
 
 function doneEncoding( blob ) {
+  gBlob = blob;
     Recorder.setupDownload( blob, "myRecording" + ((recIndex<10)?"0":"") + recIndex + ".wav" );
     recIndex++;
+}
+
+function classify() {
+  var xhr = new XMLHttpRequest();
+  xhr.onload=function(e) {
+    if(this.readyState === 4) {
+      console.log("Server returned: ", e.target.responseText);
+     }
+  };
+
+  var folderTypeForm = document.getElementById("folderType");
+  var path = folderTypeForm.value;
+
+  var formData = new FormData();
+  formData.append("name", "filename.wav");
+  formData.append("file", gBlob);
+  formData.append("path", path)
+  xhr.open("POST", "upload", true);
+  console.log(formData);
+  xhr.send(formData);
 }
 
 function toggleRecording( e ) {

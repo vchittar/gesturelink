@@ -107,7 +107,7 @@ DEALINGS IN THE SOFTWARE.
   };
 
   Recorder.setupDownload = function(blob, filename){
-    var file = new File([blob], 'filename', {type: 'contentType', lastModified: Date.now()});
+    var file = new File([blob], filename, {type: 'contentType', lastModified: Date.now()});
     var url = (window.URL || window.webkitURL).createObjectURL(file);
     var link = document.getElementById("save");
     link.href = url;
